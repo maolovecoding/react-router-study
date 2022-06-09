@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <ul>
+    <li><a onclick="pushA()">a组件</a></li>
+    <li><a onclick="pushB()">b组件</a></li>
+    <li><a onclick="pushC()">c组件</a></li>
+  </ul>
+  <div id="root"></div>
+  <script>
+    ((history) => {
+      const pushState = history.pushState
+      history.pushState = function (state, title, pathname) {
+        const res = pushState.apply(history, arguments);
+        if (typeof window.onpushstate === "function") {
+          window.onpushstate(new CustomEvent("pushstate", { detail: { pathname, state } }))
+        }
+      }
+      const replaceState = history.replaceState
+      history.replaceState = function (state, title, pathname) {
+        const res = replaceState.apply(history, arguments)
+        if (typeof window.onreplacestate === "function") {
+          window.onreplacestate(new CustomEvent("replaceState", { detail: { pathname, state } }))
+        }
+      }
+    })(history)
+    function pushA() {
+      history.pushState({ name: "A" }, null, "/a")
+    }
+    function pushB() {
+      history.pushState({ name: "B" }, null, "/b")
+    }
+    function pushC() {
+      history.replaceState({ name: "C" }, null, "/c")
+    }
+    window.addEventListener("popstate", (e) => {
+      console.log(e)
+      root.innerHTML = e.state?.name
+    })
+    window.onpushstate = (e) => {
+      console.log(e)
+      root.innerHTML = e.detail.state?.name
+    }
+    window.onreplacestate = (e) => {
+      console.log(e)
+      root.innerHTML = e.detail.state.name
+    }
+  </script>
+</body>
+
+</html>
