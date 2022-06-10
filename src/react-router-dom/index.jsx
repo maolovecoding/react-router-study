@@ -5,7 +5,7 @@
  * @Last Modified time: 2022-06-10 09:26:29
  */
 import { useRef, useState, useLayoutEffect } from "react";
-import { Router } from "../react-router";
+import { Router, useNavigate, useLocation } from "../react-router";
 import { createBrowserHistory, createHashHistory } from "../history";
 export * from "../react-router";
 /**
@@ -61,4 +61,49 @@ function HashRouter({ children }) {
     />
   );
 }
-export { BrowserRouter, HashRouter };
+
+function Link({ to, ...rest }) {
+  const navigate = useNavigate(); // history
+  const handleClick = (e) => {
+    e.preventDefault();
+    navigate(to);
+  };
+  return <a {...rest} href={to} onClick={handleClick}></a>;
+}
+function NavLink({
+  to,
+  className: classNameProp, // 类名 可能是字符串 也可能是函数
+  end = false, // 是否结束 end为true表示当前路径结束了
+  style: styleProp = {}, // 样式 可能是一个对象也可以是一个函数
+  children,
+  ...rest
+}) {
+  // 类名
+  let className;
+  let style;
+  const location = useLocation();
+  // 当前地址栏的实际路径
+  const pathname = location.pathname;
+  // 要匹配的路径
+  const path = { pathname: to };
+  const isActive =
+    //1. pathname和to完全相等 激活
+    pathname === to ||
+    // 2. pathname以to路径开头 且pathname在包含to路径后的下一个字符是 / 且end为false 也需要激活
+    (!end && pathname.startsWith(to) && pathname.charAt(to.length) === "/");
+  // 类名
+  if (typeof classNameProp === "function") {
+    className = classNameProp({ isActive });
+  } else {
+    className = isActive ? classNameProp ?? "active" : "";
+  }
+  // 样式
+  style = typeof styleProp === "function" ? styleProp({ isActive }) : styleProp;
+  return (
+    <Link className={className} style={style} to={to} {...rest}>
+      {children}
+    </Link>
+  );
+}
+
+export { BrowserRouter, HashRouter, Link, NavLink };

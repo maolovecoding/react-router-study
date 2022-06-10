@@ -2,9 +2,16 @@
  * @Author: 毛毛
  * @Date: 2022-06-09 16:24:33
  * @Last Modified by: 毛毛
- * @Last Modified time: 2022-06-10 09:26:46
+ * @Last Modified time: 2022-06-10 11:33:47
  */
-import { Children, createContext, useContext } from "react";
+import {
+  Children,
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  cloneElement,
+} from "react";
 const NavigationContext = createContext();
 const LocationContext = createContext();
 const RouterContext = createContext();
@@ -38,13 +45,28 @@ function Route(props) {}
 function useLocation() {
   return useContext(LocationContext).location;
 }
+
+function useNavigate() {
+  const navigator = useContext(NavigationContext).navigator;
+  const navigate = useCallback(
+    (to) => {
+      navigator.push(to);
+    },
+    [navigator]
+  );
+  return navigate;
+}
 /**
  * 把路径转换为正则表达式
  * @param {*} path
  */
 function compilePath(path) {
-  const regexpSource = `^${path}$`;
-  return new RegExp(regexpSource);
+  const paramNames = [];
+  const regexpStr = path.replace(/:(\w+)/g, ($1, $2) => {
+    paramNames.push($2);
+    return "([^/]+)";
+  });
+  return [`^${regexpStr}$`, paramNames];
 }
 
 /**
@@ -54,9 +76,20 @@ function compilePath(path) {
  * @returns
  */
 function matchPath(path, pathname) {
-  const matcher = compilePath(path);
+  const [matcher, paramNames] = compilePath(path);
   const match = pathname.match(matcher);
-  return match;
+  if (!match) return null;
+  const matchedPathname = match[0]; // 匹配路径
+  const values = match.slice(1); // 路径参数数组
+  const params = paramNames.reduce((memo, paramName, index) => {
+    memo[paramName] = values[index];
+    return memo;
+  }, {});
+  return {
+    params,
+    pathname: matchedPathname,
+    path,
+  };
 }
 
 function useRoutes(routes) {
@@ -67,7 +100,7 @@ function useRoutes(routes) {
   for (let i = 0; i < routes.length; i++) {
     const { element, path } = routes[i];
     const match = matchPath(path, pathname);
-    if (match) return element;
+    if (match) return cloneElement(element, { ...element.props, match });
   }
 }
 
@@ -83,4 +116,11 @@ function createRoutesFromChildren(children) {
   return routes;
 }
 
-export { Router, Routes, Route };
+function Navigate({ to }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate(to);
+  });
+}
+
+export { Router, Routes, Route, useNavigate, useLocation, Navigate };
