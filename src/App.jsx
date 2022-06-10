@@ -13,16 +13,10 @@ const Profile = () => {
 const Test = () => {
   return <div>Test</div>;
 };
-{/* <ul>
-<li><a href="/">home</a></li>
-<li><a href="/user">user</a></li>
-<li><a href="/profile">profile</a></li>
-<li><a href="/test">test</a></li>
-</ul> */}
+
 function App() {
   return (
     <div className="App">
-
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />}></Route>

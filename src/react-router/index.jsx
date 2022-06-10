@@ -2,7 +2,7 @@
  * @Author: 毛毛
  * @Date: 2022-06-09 16:24:33
  * @Last Modified by: 毛毛
- * @Last Modified time: 2022-06-09 19:51:35
+ * @Last Modified time: 2022-06-10 09:26:46
  */
 import { Children, createContext, useContext } from "react";
 const NavigationContext = createContext();
@@ -36,7 +36,6 @@ function Route(props) {}
  * 返回当前的路径对象
  */
 function useLocation() {
-  console.log(useContext(LocationContext));
   return useContext(LocationContext).location;
 }
 /**
@@ -65,7 +64,6 @@ function useRoutes(routes) {
   const location = useLocation();
   // 路径
   const pathname = location.pathname ?? "/";
-  console.log(pathname, "-------");
   for (let i = 0; i < routes.length; i++) {
     const { element, path } = routes[i];
     const match = matchPath(path, pathname);
