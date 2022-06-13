@@ -9,7 +9,8 @@ import {
   Navigate,
   useNavigate,
   useLocation,
-  // Outlet
+  Outlet,
+  useParams
 } from "./react-router-dom";
 
 const User = (props) => {
@@ -89,6 +90,7 @@ const UserList = (props) => {
   return <div>UserList</div>;
 };
 const UserDetail = (props) => {
+  console.log(useParams())
   return <div>UserDetail</div>;
 };
 const activeStyle = {
@@ -120,10 +122,10 @@ function App() {
         </ul>
         <Routes>
           <Route path="/" element={<Home />}></Route>
-          <Route path="/user/*" element={<User />}>
-            <Route path="add" element={<UserAdd />} />
-            <Route path="list" element={<UserList />} />
-            <Route path="detail/:id" element={<UserDetail />} />
+          <Route path="/user" index={2} element={<User />}>
+            <Route path="add" index={1} element={<UserAdd />} />
+            <Route path="list" index={0} element={<UserList />} />
+            <Route path="detail/:id" index={4} element={<UserDetail />} />
           </Route>
           {/* <Route
             path="/profile"
